@@ -55,6 +55,10 @@ class AuthService {
     return _auth.currentUser?.uid;
   }
 
+  nameuser() async {
+    return await _firestore.collection('Person').doc(infouser()).get();
+  }
+
   Future<User?> createPerson(String name, String email, String password) async {
     var user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
 

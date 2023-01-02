@@ -4,22 +4,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_freelance_webpage/constants/myconstants.dart';
-import 'package:my_freelance_webpage/pages/my_home_page.dart';
-import 'package:my_freelance_webpage/pages/sign_out_page.dart';
+import 'package:my_freelance_webpage/pages/sign_in_page.dart';
 import 'package:my_freelance_webpage/service/auth_register.dart';
 
-class SingUpPage extends StatefulWidget {
-  const SingUpPage({Key? key}) : super(key: key);
+class SignOutPage extends StatefulWidget {
+  const SignOutPage({Key? key}) : super(key: key);
 
   @override
-  State<SingUpPage> createState() => _SingUpPageState();
+  State<SignOutPage> createState() => _SignOutPageState();
 }
 
-class _SingUpPageState extends State<SingUpPage> {
+class _SignOutPageState extends State<SignOutPage> {
   final AuthService _auth = AuthService();
   final _formkey = GlobalKey<FormState>();
   final TextEditingController _controllerMail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
+  final TextEditingController _controllerPasswordAgain = TextEditingController();
+  final TextEditingController _controllerName = TextEditingController();
+
   bool _butstate = false;
 
   basildi() {
@@ -37,6 +39,8 @@ class _SingUpPageState extends State<SingUpPage> {
   void dispose() {
     _controllerMail.dispose();
     _controllerPassword.dispose();
+    _controllerPasswordAgain.dispose();
+    _controllerName.dispose();
     super.dispose();
   }
 
@@ -61,7 +65,7 @@ class _SingUpPageState extends State<SingUpPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: SizedBox(
-                  height: 600,
+                  height: 700,
                   width: 400,
                   child: Padding(
                     padding: const EdgeInsets.all(30),
@@ -69,7 +73,7 @@ class _SingUpPageState extends State<SingUpPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(30),
+                          padding: const EdgeInsets.all(10),
                           child: Icon(
                             Icons.webhook_outlined,
                             color: MyConstants.instance.mountainMeadow,
@@ -78,6 +82,25 @@ class _SingUpPageState extends State<SingUpPage> {
                         ),
                         const SizedBox(
                           height: 60,
+                        ),
+                        TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Lütfen adınızı soyadınızı girin.";
+                            }
+
+                            return null;
+                          },
+                          controller: _controllerName,
+                          decoration: const InputDecoration(
+                              label: Text('Name Surname'),
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                color: Colors.black,
+                              ))),
+                        ),
+                        const SizedBox(
+                          height: 20,
                         ),
                         TextFormField(
                           validator: (value) {
@@ -106,7 +129,24 @@ class _SingUpPageState extends State<SingUpPage> {
                             if (value == null || value.isEmpty) {
                               return "Şifre boş olamaz";
                             }
-                            if (value.length <= 8) {
+                            if (_controllerPassword.text != _controllerPasswordAgain.text) {
+                              return "Şifreler aynı olmalıdır.";
+                            } else if (value.length <= 8 &&
+                                (value.contains(RegExp(r'[A-Z]')) != true) &&
+                                (value.contains(RegExp(r'[0-9]')) != true)) {
+                              return "• Şifre 8 karakterden büyük olmalıdır.\n• Şifre en az bir büyük harf barındırmalıdır.\n• Şifre en az bir rakam barındırmalıdır.";
+                            } else if (value.length <= 8 && (value.contains(RegExp(r'[A-Z]')) != true)) {
+                              return "• Şifre 8 karakterden büyük olmalıdır.\n• Şifre en az bir büyük harf barındırmalıdır.";
+                            } else if (value.length <= 8 && (value.contains(RegExp(r'[0-9]')) != true)) {
+                              return "• Şifre 8 karakterden büyük olmalıdır.\n• Şifre en az bir rakam barındırmalıdır.";
+                            } else if ((value.contains(RegExp(r'[A-Z]')) != true) &&
+                                (value.contains(RegExp(r'[0-9]')) != true)) {
+                              return "• Şifre en az bir büyük harf barındırmalıdır.\n• Şifre en az bir rakam barındırmalıdır.";
+                            } else if (value.contains(RegExp(r'[A-Z]')) != true) {
+                              return "Şifrede en az bir büyük harf bulunmalıdır.";
+                            } else if (value.contains(RegExp(r'[0-9]')) != true) {
+                              return "Şifrede en az bir rakam bulunmalıdır.";
+                            } else if (value.length <= 8) {
                               return "Şifre 8 karakterden büyük olmalıdır.";
                             }
                             return null;
@@ -114,6 +154,28 @@ class _SingUpPageState extends State<SingUpPage> {
                           controller: _controllerPassword,
                           decoration: const InputDecoration(
                               label: Text('Password'),
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                color: Colors.black,
+                              ))),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        TextFormField(
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Şifre boş olamaz";
+                            }
+                            if (_controllerPassword.text != _controllerPasswordAgain.text) {
+                              return "Şifreler aynı olmalıdır.";
+                            }
+                            return null;
+                          },
+                          controller: _controllerPasswordAgain,
+                          decoration: const InputDecoration(
+                              label: Text('Password Again'),
                               border: OutlineInputBorder(
                                   borderSide: BorderSide(
                                 color: Colors.black,
@@ -150,13 +212,66 @@ class _SingUpPageState extends State<SingUpPage> {
                           onPressed: () {
                             if (_formkey.currentState!.validate()) {
                               basildi();
-                              _auth.signIn(_controllerMail.text, _controllerPassword.text).then((value) {
-                                Navigator.push(context, MaterialPageRoute(
+                              _auth
+                                  .createPerson(
+                                _controllerName.text,
+                                _controllerMail.text,
+                                _controllerPassword.text,
+                              )
+                                  .then((value) {
+                                Get.to(const SingUpPage());
+                                return showDialog(
+                                  context: context,
                                   builder: (context) {
-                                    return const MyHomePage();
+                                    return Dialog(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(20),
+                                        child: SizedBox(
+                                          height: 150,
+                                          width: 300,
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: const [
+                                                  Icon(
+                                                    Icons.done_outline_outlined,
+                                                    color: Colors.green,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Text(
+                                                    'Kayıt Olundu!',
+                                                    style: TextStyle(
+                                                        fontWeight: FontWeight.w600, fontSize: 20, color: Colors.black),
+                                                  ),
+                                                ],
+                                              ),
+                                              const Text(
+                                                'Hesabınız başarıyla oluşturuldu. Giriş yapabilirsiniz.',
+                                                style: TextStyle(
+                                                  color: Colors.black54,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  basildi();
+
+                                                  Get.back();
+                                                },
+                                                child: const Text('Giriş Yap'),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
                                   },
-                                ));
-                                // Get.back();
+                                );
                               }).onError((error, stackTrace) {
                                 return showDialog(
                                   context: context,
@@ -182,7 +297,7 @@ class _SingUpPageState extends State<SingUpPage> {
                                                     width: 10,
                                                   ),
                                                   Text(
-                                                    'Giriş Yapılamadı!',
+                                                    'Kayıt Olunamadı!',
                                                     style: TextStyle(
                                                         fontWeight: FontWeight.w600, fontSize: 20, color: Colors.black),
                                                   ),
@@ -214,7 +329,7 @@ class _SingUpPageState extends State<SingUpPage> {
                             }
                             // Navigator.push(context, MaterialPageRoute(
                             //   builder: (context) {
-                            //     return const SingUpPage();
+                            //     return const SignOutPage();
                             //   },
                             // ));
                           },
@@ -225,7 +340,7 @@ class _SingUpPageState extends State<SingUpPage> {
                                     color: Colors.white,
                                   )
                                 : const Text(
-                                    "Giriş Yap",
+                                    "Kaydol",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w900,
                                       letterSpacing: 2,
@@ -239,22 +354,19 @@ class _SingUpPageState extends State<SingUpPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text(
-                              'Bir hesabın yok mu?',
+                              'Bir hesabın var mı?',
                               style: TextStyle(color: Colors.black54),
                             ),
                             TextButton(
                               onPressed: () {
-                                Get.to(const SignOutPage());
+                                Get.to(const SingUpPage());
                               },
                               child: const Text(
-                                'Hemen Kaydol',
+                                'Hemen Giriş Yap',
                                 style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(
-                          height: 10,
                         ),
                       ],
                     ),

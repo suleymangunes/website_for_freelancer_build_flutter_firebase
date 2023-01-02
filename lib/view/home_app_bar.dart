@@ -3,7 +3,8 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
 import 'package:my_freelance_webpage/constants/myconstants.dart';
 import 'package:my_freelance_webpage/controller/get_controller.dart';
-import 'package:my_freelance_webpage/pages/body_pages/about.dart';
+import 'package:my_freelance_webpage/pages/sign_in_page.dart';
+import 'package:my_freelance_webpage/service/auth_register.dart';
 
 class HomeAppBar extends StatefulWidget with PreferredSizeWidget {
   const HomeAppBar({
@@ -22,11 +23,20 @@ class HomeAppBar extends StatefulWidget with PreferredSizeWidget {
 class HomeAppBarState extends State<HomeAppBar> with SingleTickerProviderStateMixin {
   final Controller controller = Get.put(Controller());
   late TabController tabcontroller;
+  String? isim;
+
+  String? icerik;
 
   @override
   void initState() {
     super.initState();
     tabcontroller = TabController(length: 5, vsync: this);
+    authService.nameuser().then((value) {
+      setState(() {
+        isim = value.data()?['userName'];
+        icerik = isim;
+      });
+    });
   }
 
   @override
@@ -34,6 +44,18 @@ class HomeAppBarState extends State<HomeAppBar> with SingleTickerProviderStateMi
     tabcontroller.dispose();
     super.dispose();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    authService.nameuser().then((value) {
+      setState(() {
+        isim = value.data()?['userName'];
+      });
+    });
+  }
+
+  AuthService authService = AuthService();
 
   // TabController tabController = TabController(length: 5, vsync: HomeAppBarState());
   @override
@@ -43,20 +65,25 @@ class HomeAppBarState extends State<HomeAppBar> with SingleTickerProviderStateMi
       child: Stack(
         children: [
           AppBar(
-            leading: const Padding(
-              padding: EdgeInsets.only(
-                top: 22,
-                left: 25,
-              ),
-              child: Text(
-                'First',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
+            leading: Padding(
+                padding: const EdgeInsets.only(
+                  top: 22,
+                  left: 25,
                 ),
-              ),
-            ),
+                child: Icon(
+                  Icons.webhook_outlined,
+                  color: MyConstants.instance.mountainMeadow,
+                  size: 38,
+                )
+                // Text(
+                //   'First',
+                //   style: TextStyle(
+                //     color: Colors.black,
+                //     fontSize: 30,
+                //     fontWeight: FontWeight.w900,
+                //   ),
+                // ),
+                ),
             leadingWidth: 110,
             title: Row(
               mainAxisSize: MainAxisSize.max,
@@ -73,7 +100,9 @@ class HomeAppBarState extends State<HomeAppBar> with SingleTickerProviderStateMi
                             child: Obx(
                               () {
                                 // return Text(controller.sayfa.value.toString());
-                                controller.increment();
+
+                                // controller.increment();
+
                                 if (controller.sayfa.value == 1) {
                                   return TabbarimView(
                                     tabcontroller: tabcontroller,
@@ -97,7 +126,7 @@ class HomeAppBarState extends State<HomeAppBar> with SingleTickerProviderStateMi
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           Positioned(
-            right: 305,
+            right: 405,
             top: 18,
             child: CircleAvatar(
               backgroundColor: MyConstants.instance.mountainMeadow,
@@ -116,7 +145,7 @@ class HomeAppBarState extends State<HomeAppBar> with SingleTickerProviderStateMi
           ),
           Positioned(
             top: 17,
-            right: 140,
+            right: 240,
             child: TextButton(
               style: ButtonStyle(
                 foregroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
@@ -149,54 +178,123 @@ class HomeAppBarState extends State<HomeAppBar> with SingleTickerProviderStateMi
               ),
             ),
           ),
-          Positioned(
-            top: 17,
-            right: 30,
-            child: ElevatedButton(
-              style: ButtonStyle(
-                  elevation: MaterialStateProperty.all(0),
-                  backgroundColor: MaterialStateProperty.resolveWith((states) {
-                    if (states.contains(MaterialState.hovered)) {
-                      return Colors.white;
-                    }
-                    return MyConstants.instance.mountainMeadow;
-                  }),
-                  foregroundColor: MaterialStateProperty.resolveWith((states) {
-                    if (states.contains(MaterialState.hovered)) {
-                      return MyConstants.instance.mountainMeadow;
-                    }
-                    return Colors.white;
-                  }),
-                  shape: MaterialStateProperty.resolveWith((states) {
-                    if (states.contains(MaterialState.hovered)) {
-                      return StadiumBorder(side: BorderSide(color: MyConstants.instance.mountainMeadow));
-                    }
-                    return RoundedRectangleBorder(borderRadius: BorderRadius.circular(30));
-                  })
-                  // shape: MaterialStateProperty.all(
-                  //   RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                  // ),
+          authService.issignin() == null
+              ? Positioned(
+                  top: 17,
+                  right: 30,
+                  width: 200,
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                        elevation: MaterialStateProperty.all(0),
+                        backgroundColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.hovered)) {
+                            return Colors.white;
+                          }
+                          return MyConstants.instance.mountainMeadow;
+                        }),
+                        foregroundColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.hovered)) {
+                            return MyConstants.instance.mountainMeadow;
+                          }
+                          return Colors.white;
+                        }),
+                        shape: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.hovered)) {
+                            return StadiumBorder(side: BorderSide(color: MyConstants.instance.mountainMeadow));
+                          }
+                          return RoundedRectangleBorder(borderRadius: BorderRadius.circular(30));
+                        })
+                        // shape: MaterialStateProperty.all(
+                        //   RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                        // ),
+                        ),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return const SingUpPage();
+                        },
+                      ));
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                      child: Text(
+                        "Sign in",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
                   ),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(
-                  builder: (context) {
-                    return const AboutBodyPage();
-                  },
-                ));
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-                child: Text(
-                  "Sign in",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2,
-                    fontSize: 15,
+                )
+              : Positioned(
+                  top: 17,
+                  right: 30,
+                  width: 200,
+                  child: MouseRegion(
+                    onHover: (event) {
+                      setState(() {
+                        icerik = 'Çıkış Yap';
+                      });
+                    },
+                    onEnter: (event) {
+                      setState(() {
+                        icerik = isim;
+                      });
+                    },
+                    onExit: (event) {
+                      setState(() {
+                        icerik = isim;
+                      });
+                    },
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(0),
+                          backgroundColor: MaterialStateProperty.resolveWith((states) {
+                            if (states.contains(MaterialState.hovered)) {
+                              return MyConstants.instance.mountainMeadow;
+                            }
+                            return Colors.white;
+                          }),
+                          foregroundColor: MaterialStateProperty.resolveWith((states) {
+                            if (states.contains(MaterialState.hovered)) {
+                              return Colors.white;
+                            }
+                            return MyConstants.instance.mountainMeadow;
+                          }),
+                          shape:
+                              MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)))
+
+                          // MaterialStateProperty.resolveWith((states) {
+                          //   if (states.contains(MaterialState.hovered)) {
+                          //     return StadiumBorder(side: BorderSide(color: MyConstants.instance.mountainMeadow));
+                          //   }
+                          //   return RoundedRectangleBorder(borderRadius: BorderRadius.circular(30));
+                          // })
+                          // shape: MaterialStateProperty.all(
+                          //   RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          // ),
+                          ),
+                      onPressed: () {
+                        setState(() {
+                          authService.signOut();
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                        child: Text(
+                          icerik.toString(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 2,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          )
         ],
       ),
     );
